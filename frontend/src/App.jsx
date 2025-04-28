@@ -4,7 +4,7 @@ import './App.css';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import ApplyPage from './pages/ApplyPage';
 import MyApplications from './pages/MyApplications';
-import Navbar from './components/Navbar';
+import Navbar from './components/Navbar.jsx';
 
 function App() {
   return (

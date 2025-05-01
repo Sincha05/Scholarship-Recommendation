@@ -1,43 +1,34 @@
-const db = require('../db');
-exports.createScholarship = (scholarshipData, callback) => {
-  const {
-    title,
-    description,
-    field_of_study,
-    min_gpa,
-    target_country,
-    gender_requirement,
-    income_requirement,
-    application_deadline
-  } = scholarshipData;
-
-  const query = `
-    INSERT INTO scholarships 
-    (title, description, field_of_study, min_gpa, target_country, gender_requirement, income_requirement, application_deadline)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-
-  db.query(query, [
-    title,
-    description,
-    field_of_study,
-    min_gpa,
-    target_country,
-    gender_requirement,
-    income_requirement,
-    application_deadline
-  ], callback);
-};
-
-exports.getAllScholarships = (callback) => {
-  const query = 'SELECT * FROM scholarships WHERE application_deadline >= CURDATE()';
-  db.query(query, callback);
-};
-exports.getScholarshipById = (id, callback) => {
-  const query = 'SELECT * FROM scholarships WHERE id = ?';
-  db.query(query, [id], (err, results) => {
-    if (err) return callback(err);
-    if (results.length === 0) return callback(null, null);
-    callback(null, results[0]);
+module.exports = (sequelize, DataTypes) => {
+  const Scholarship = sequelize.define('Scholarship', {
+    title: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: false
+    },
+    deadline: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
+    amount: {
+      type: DataTypes.DECIMAL(10,2)
+    },
+    field_of_study: {
+      type: DataTypes.STRING(100)
+    },
+    eligibility_criteria: {
+      type: DataTypes.TEXT
+    }
   });
+
+  Scholarship.associate = (models) => {
+    Scholarship.hasMany(models.Application, {
+      foreignKey: 'scholarship_id',
+      as: 'applications'
+    });
+  };
+
+  return Scholarship;
 };

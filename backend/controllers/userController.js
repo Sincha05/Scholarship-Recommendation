@@ -17,23 +17,53 @@ exports.register = (req, res) => {
 };
 
 exports.login = (req, res) => {
+  console.log('Login request received:', req.body); // Log incoming request
+  
   const { email, password } = req.body;
+  
+  if (!email || !password) {
+    console.log('Missing credentials');
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
 
   db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (results.length === 0) return res.status(404).json({ message: 'User not found' });
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ message: 'Database error', error: err.message });
+    }
+    
+    if (results.length === 0) {
+      console.log('User not found for email:', email);
+      return res.status(404).json({ message: 'User not found' });
+    }
 
     const user = results[0];
-    const passwordIsValid = bcrypt.compareSync(password, user.password);
-    if (!passwordIsValid) return res.status(401).json({ message: 'Invalid password' });
+    console.log('User found:', user.id);
+    
+    try {
+      console.log('Comparing passwords...');
+      console.log('Input password:', password);
+      console.log('Stored hash:', user.password);
+      
+      const passwordIsValid = bcrypt.compareSync(password, user.password);
+      console.log('Password match:', passwordIsValid);
+      
+      if (!passwordIsValid) {
+        return res.status(401).json({ message: 'Invalid password' });
+      }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-
-    res.json({
-      message: 'Login successful',
-      token,
-      user: { id: user.id, name: user.name, email: user.email }
-    });
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+      
+      console.log('Login successful for user:', user.id);
+      res.json({
+        message: 'Login successful',
+        token,
+        user: { id: user.id, name: user.name, email: user.email }
+      });
+    } catch (error) {
+      console.error('Password comparison error:', error);
+      res.status(500).json({ message: 'Authentication error', error: error.message });
+    }
   });
 };
 

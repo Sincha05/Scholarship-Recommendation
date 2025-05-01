@@ -1,19 +1,28 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard.jsx';
+import Login from './components/Login';
+import Register from './components/Register';
+import Header from './components/Navbar';
+import Scholarships from './components/Scholarships';
+import Preferences from './components/Preferences';       // ✅ Import
+import Recommendations from './components/Recommendations'; // ✅ Import
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path='/' element={<Home />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
-        <Route path='/dashboard' element={<Dashboard />} />
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Header /> 
+        <Routes>
+          <Route path="/" element={<Scholarships />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/scholarships" element={<Scholarships />} />
+          <Route path="/preferences" element={<Preferences />} /> {/* ✅ New Route */}
+          <Route path="/recommendations" element={<Recommendations />} /> {/* ✅ New Route */}
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

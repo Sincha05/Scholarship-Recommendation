@@ -1,16 +1,19 @@
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
 
 const verifyToken = (req, res, next) => {
-  const token = req.headers['authorization']?.split(' ')[1];
-  if (!token) return res.status(403).json({ message: 'No token provided' });
+  const token = req.headers['authorization'];
+  
+  if (!token) {
+    return res.status(403).json({ error: 'No token provided' });
+  }
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) return res.status(401).json({ message: 'Unauthorized' });
-
-    req.userId = decoded.id;
+    if (err) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    req.user = decoded;
     next();
   });
 };
 
-module.exports = verifyToken;
+module.exports = { verifyToken };  // Make sure this export exists

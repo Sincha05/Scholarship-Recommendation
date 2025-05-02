@@ -1,0 +1,53 @@
+CREATE TABLE users (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255),
+    email VARCHAR(255) UNIQUE,
+    password VARCHAR(255),
+    gender VARCHAR(50),
+    country VARCHAR(100),
+    field_of_study VARCHAR(100),
+    gpa DECIMAL(3,2),
+    income_level VARCHAR(50),
+    date_of_birth DATE
+);
+
+
+CREATE TABLE scholarships (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    deadline DATE NOT NULL,
+    amount DECIMAL(10,2),
+    field_of_study VARCHAR(100),
+    eligibility_criteria TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE preferences (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    category VARCHAR(50),
+    degree VARCHAR(100),
+    income INT,
+    state VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    preferred_country VARCHAR(100),
+    preferred_field VARCHAR(100),
+    min_gpa FLOAT,
+    max_income INT,
+    gender_preference VARCHAR(20),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+
+CREATE TABLE user_preferences (
+    user_id INT NOT NULL PRIMARY KEY,
+    preferred_country VARCHAR(100),
+    preferred_field VARCHAR(100),
+    min_gpa DECIMAL(3,2),
+    max_income VARCHAR(50),
+    gender_preference VARCHAR(50),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);

@@ -1,38 +1,48 @@
 const db = require('../db');
 
-// Save or update user preferences
-exports.savePreferences = (userId, preferences, callback) => {
-  const {
-    preferred_country,
-    preferred_field,
-    min_gpa,
-    max_income,
-    gender_preference
-  } = preferences;
+class Preference {
+  static async savePreferences(userId, preferences) {
+    const query = `
+      INSERT INTO preferences (
+        user_id, category, degree, income, state,
+        preferred_country, preferred_field, min_gpa, max_income, gender_preference
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        category = VALUES(category),
+        degree = VALUES(degree),
+        income = VALUES(income),
+        state = VALUES(state),
+        preferred_country = VALUES(preferred_country),
+        preferred_field = VALUES(preferred_field),
+        min_gpa = VALUES(min_gpa),
+        max_income = VALUES(max_income),
+        gender_preference = VALUES(gender_preference),
+        updated_at = CURRENT_TIMESTAMP
+    `;
 
-  const checkQuery = 'SELECT * FROM user_preferences WHERE user_id = ?';
-  db.query(checkQuery, [userId], (err, results) => {
-    if (err) return callback(err);
+    const values = [
+      userId,
+      preferences.category,
+      preferences.degree,
+      preferences.income,
+      preferences.state,
+      preferences.preferred_country,
+      preferences.preferred_field,
+      preferences.min_gpa,
+      preferences.max_income,
+      preferences.gender_preference
+    ];
 
-    if (results.length > 0) {
-      const updateQuery = `
-        UPDATE user_preferences 
-        SET preferred_country = ?, preferred_field = ?, min_gpa = ?, max_income = ?, gender_preference = ?
-        WHERE user_id = ?
-      `;
-      db.query(updateQuery, [preferred_country, preferred_field, min_gpa, max_income, gender_preference, userId], callback);
-    } else {
-      const insertQuery = `
-        INSERT INTO user_preferences 
-        (user_id, preferred_country, preferred_field, min_gpa, max_income, gender_preference)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `;
-      db.query(insertQuery, [userId, preferred_country, preferred_field, min_gpa, max_income, gender_preference], callback);
-    }
-  });
-};
+    await db.query(query, values);
+  }
 
-// Get user preferences
-exports.getPreferences = (userId, callback) => {
-  db.query('SELECT * FROM user_preferences WHERE user_id = ?', [userId], callback);
-};
+  static async getPreferences(userId) {
+    const [rows] = await db.query(
+      'SELECT * FROM preferences WHERE user_id = ? LIMIT 1',
+      [userId]
+    );
+    return rows[0] || null;
+  }
+}
+
+module.exports = Preference;

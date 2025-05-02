@@ -1,41 +1,17 @@
-import React from "react";
-import { Link } from "react-router-dom";
+// src/components/Navbar.js
+import React from 'react';
+import { Link } from 'react-router-dom';
 
-const Header = ({ user, logoutUser }) => {
+const Navbar = () => {
   return (
-    <nav>
-      <ul>
-        <li>
-          <Link to="/">Home</Link>
-        </li>
-        <li>
-          <Link to="/scholarships">Scholarships</Link>
-        </li>
-        {user ? (
-          <>
-            <li>
-              <Link to="/preferences">Preferences</Link>
-            </li>
-            <li>
-              <Link to="/profile">Profile</Link>
-            </li>
-            <li>
-              <button onClick={logoutUser}>Logout</button>
-            </li>
-          </>
-        ) : (
-          <>
-            <li>
-              <Link to="/login">Login</Link>
-            </li>
-            <li>
-              <Link to="/register">Register</Link>
-            </li>
-          </>
-        )}
-      </ul>
+    <nav style={{ marginBottom: '20px' }}>
+      <Link to="/scholarships">Scholarships</Link> |{" "}
+      <Link to="/preferences">Preferences</Link> |{" "}
+      <Link to="/recommendations">Recommendations</Link> |{" "}
+      <Link to="/login">Login</Link> |{" "}
+      <Link to="/register">Register</Link>
     </nav>
   );
 };
 
-export default Header;
+export default Navbar;

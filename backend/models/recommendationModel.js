@@ -1,40 +1,35 @@
-const db = require('../db');
+const db = require('../db');  // Import the database connection
 
-exports.getRecommendedScholarships = (userId, callback) => {
-  const userQuery = 'SELECT * FROM users WHERE id = ?';
-  const prefQuery = 'SELECT * FROM user_preferences WHERE user_id = ?';
+// Create a recommendation
+exports.createRecommendation = async (userId, scholarshipId, score, reason) => {
+  const query = `
+    INSERT INTO recommendations (user_id, scholarship_id, score, reason)
+    VALUES (?, ?, ?, ?)
+  `;
+  const [rows] = await db.execute(query, [userId, scholarshipId, score, reason]);
+  return rows;
+};
 
-  db.query(userQuery, [userId], (err, userResults) => {
-    if (err) return callback(err);
-    if (userResults.length === 0) return callback(null, []);
+// Get recommendations for a specific user
+exports.getRecommendationsByUser = async (userId) => {
+  const query = `
+    SELECT r.id AS recommendation_id, s.title, s.deadline, r.score, r.reason
+    FROM recommendations r
+    JOIN scholarships s ON r.scholarship_id = s.id
+    WHERE r.user_id = ?
+  `;
+  const [rows] = await db.execute(query, [userId]);
+  return rows;
+};
 
-    const user = userResults[0];
-
-    db.query(prefQuery, [userId], (err, prefResults) => {
-      if (err) return callback(err);
-
-      const prefs = prefResults[0] || {};
-
-      const query = `
-        SELECT * FROM scholarships
-        WHERE
-          (country = ? OR ? IS NULL OR ? = '')
-          AND (field_of_study = ? OR ? IS NULL OR ? = '')
-          AND (min_gpa <= ? OR min_gpa IS NULL)
-          AND (max_income >= ? OR max_income IS NULL)
-          AND (gender_requirement = ? OR gender_requirement = 'any' OR ? IS NULL OR ? = '')
-        ORDER BY deadline ASC
-      `;
-
-      const values = [
-        prefs.preferred_country, prefs.preferred_country, prefs.preferred_country,
-        prefs.preferred_field, prefs.preferred_field, prefs.preferred_field,
-        user.gpa,
-        user.income_level,
-        prefs.gender_preference, prefs.gender_preference, prefs.gender_preference
-      ];
-
-      db.query(query, values, callback);
-    });
-  });
+// Get all recommendations for admin (for review)
+exports.getAllRecommendations = async () => {
+  const query = `
+    SELECT r.id, u.name AS user_name, s.title AS scholarship_title, r.score, r.created_at
+    FROM recommendations r
+    JOIN users u ON r.user_id = u.id
+    JOIN scholarships s ON r.scholarship_id = s.id
+  `;
+  const [rows] = await db.execute(query);
+  return rows;
 };

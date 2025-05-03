@@ -1,13 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const recommendationController = require('../controllers/recommendationController');
-const { verifyToken } = require('../middleware/auth');
+const { generateRecommendations } = require('../controllers/recommendationController');
 
-// Debug
-console.log('Recommendation controller:', {
-  getRecommendations: typeof recommendationController.getRecommendations
-});
-
-router.get('/', verifyToken, recommendationController.getRecommendations);
+router.get('/generate/:userId', generateRecommendations);
 
 module.exports = router;

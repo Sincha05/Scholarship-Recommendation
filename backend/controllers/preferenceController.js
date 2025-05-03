@@ -6,11 +6,10 @@ exports.savePreferences = (req, res) => {
     return res.status(400).json({ error: 'User ID is required' });
   }
 
-  // Extract and validate preferences
-  const { 
-    category, 
-    degree, 
-    income, 
+  const {
+    category,
+    degree,
+    income,
     state,
     preferred_country,
     preferred_field,
@@ -57,13 +56,13 @@ exports.savePreferences = (req, res) => {
   db.query(query, values, (error, results) => {
     if (error) {
       console.error('Error saving preferences:', error);
-      return res.status(500).json({ 
+      return res.status(500).json({
         error: 'Failed to save preferences',
-        details: error.message 
+        details: error.message
       });
     }
-    
-    res.json({ 
+
+    res.json({
       success: true,
       message: 'Preferences saved successfully'
     });
@@ -82,9 +81,9 @@ exports.getPreferences = (req, res) => {
     (error, results) => {
       if (error) {
         console.error('Error fetching preferences:', error);
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: 'Failed to fetch preferences',
-          details: error.message 
+          details: error.message
         });
       }
 

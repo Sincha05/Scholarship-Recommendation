@@ -1,7 +1,7 @@
 const db = require('../db');
 
 class Preference {
-  static async savePreferences(userId, preferences) {
+  static savePreferences(userId, preferences, callback) {
     const query = `
       INSERT INTO preferences (
         user_id, category, degree, income, state,
@@ -33,15 +33,18 @@ class Preference {
       preferences.gender_preference
     ];
 
-    await db.query(query, values);
+    db.query(query, values, (err, result) => {
+      if (err) return callback(err);
+      return callback(null, result);
+    });
   }
 
-  static async getPreferences(userId) {
-    const [rows] = await db.query(
-      'SELECT * FROM preferences WHERE user_id = ? LIMIT 1',
-      [userId]
-    );
-    return rows[0] || null;
+  static getPreferences(userId, callback) {
+    const query = 'SELECT * FROM preferences WHERE user_id = ? LIMIT 1';
+    db.query(query, [userId], (err, results) => {
+      if (err) return callback(err);
+      return callback(null, results[0] || null);
+    });
   }
 }
 

@@ -54,26 +54,29 @@ const Preferences = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-
-    // Validation: Ensure all fields are filled
-    if (!preferences.category || !preferences.degree || !preferences.income) {
-      setError('Please fill in all required fields.');
+  
+    // Match backend validation
+    if (!preferences.preferred_country || !preferences.preferred_field) {
+      setError('Please fill in preferred country and field');
       setIsSubmitting(false);
       return;
     }
-
+  
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post('http://localhost:5000/api/preferences', preferences, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
       });
-
+  
       if (response.status === 200) {
-        // Redirect after successful form submission
-        navigate('/preferences'); // Or a success page, or reset the form.
+        navigate('/preferences');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to save preferences');
+      setError(err.response?.data?.error || 'Failed to save preferences');
+      console.error('Error details:', err.response?.data);
     } finally {
       setIsSubmitting(false);
     }

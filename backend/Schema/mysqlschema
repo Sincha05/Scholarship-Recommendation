@@ -11,18 +11,13 @@ CREATE TABLE users (
     date_of_birth DATE
 );
 
-
-CREATE TABLE scholarships (
+CREATE TABLE user_preferences (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
-    deadline DATE NOT NULL,
-    amount DECIMAL(10,2),
-    field_of_study VARCHAR(100),
-    eligibility_criteria TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
+    user_id INT NOT NULL,
+    preferred_country VARCHAR(100),
+    preferred_field VARCHAR(100),
+    min_gpa FLOAT,
+    max_income INT
 
 CREATE TABLE preferences (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -42,12 +37,17 @@ CREATE TABLE preferences (
 );
 
 
-CREATE TABLE user_preferences (
-    user_id INT NOT NULL PRIMARY KEY,
+CREATE TABLE scholarships (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    deadline DATE NOT NULL,
+    amount DECIMAL(10,2),
+    field_of_study VARCHAR(100),
+    eligibility_criteria TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     preferred_country VARCHAR(100),
     preferred_field VARCHAR(100),
-    min_gpa DECIMAL(3,2),
-    max_income VARCHAR(50),
-    gender_preference VARCHAR(50),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    min_gpa FLOAT,
+    max_income INT
 );

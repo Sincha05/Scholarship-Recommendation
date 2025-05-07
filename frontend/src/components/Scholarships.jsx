@@ -301,43 +301,6 @@ const Scholarships = ({ user }) => {
                   }}>{new Date(scholarship.deadline).toLocaleDateString()}</span>
                 </div>
               </div>
-              
-              <button
-                onClick={() => applyToScholarship(scholarship.id)}
-                disabled={applying === scholarship.id}
-                style={{
-                  padding: "14px 24px",
-                  borderRadius: "10px",
-                  border: "none",
-                  background: "linear-gradient(45deg, #5f27cd, #48dbfb)",
-                  color: "#ffffff",
-                  fontWeight: "600",
-                  fontSize: "16px",
-                  cursor: applying === scholarship.id ? "not-allowed" : "pointer",
-                  transition: "transform 0.3s, box-shadow 0.3s",
-                  opacity: applying === scholarship.id ? "0.7" : "1",
-                  marginTop: "10px",
-                  boxShadow: "0 4px 15px rgba(95, 39, 205, 0.4)",
-                  transform: applying === scholarship.id ? "none" : "translateY(0)",
-                  letterSpacing: "0.5px",
-                  display: "block",
-                  width: "100%"
-                }}
-                onMouseOver={(e) => {
-                  if (applying !== scholarship.id) {
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.boxShadow = "0 6px 20px rgba(95, 39, 205, 0.5)";
-                  }
-                }}
-                onMouseOut={(e) => {
-                  if (applying !== scholarship.id) {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "0 4px 15px rgba(95, 39, 205, 0.4)";
-                  }
-                }}
-              >
-                {applying === scholarship.id ? "Applying..." : "Apply Now"}
-              </button>
             </div>
           ))}
         </div>

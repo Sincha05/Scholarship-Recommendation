@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './recommendations.css';
 
@@ -204,10 +204,7 @@ const Recommendations = () => {
                     <p><strong>Deadline:</strong> {new Date(rec.details.deadline).toLocaleDateString()}</p>
                   </div>
                 )}
-                <div className="action-buttons">
-                  <button className="btn view-details-btn">View Details</button>
-                  <button className="btn apply-btn">Apply Now</button>
-                </div>
+              
               </li>
             ))}
           </ul>

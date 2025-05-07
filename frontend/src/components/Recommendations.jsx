@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import './recommendations.css';
 
 const Recommendations = () => {
   // Get userId from URL params
@@ -123,70 +124,95 @@ const Recommendations = () => {
     }
   }, [userId]); // Keep userId in dependency array
 
-  console.log("Component state:", { 
-    userId, 
-    loading, 
-    error, 
-    recommendations 
-  });
-  
-  if (loading) return <div>Loading recommendations...</div>;
+  if (loading) {
+    return (
+      <div className="recommendations-container">
+        <div className="gradient-header"></div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading recommendations...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="recommendations-container">
-      <h2>Your Scholarship Recommendations</h2>
-      
-      {usingFallbackData && (
-        <div className="notice">
-          <p>We're currently showing suggested scholarships that might be a good fit.</p>
-          {!localStorage.getItem('authToken') && (
-            <div className="auth-notice">
-              <p>For personalized recommendations, please log in.</p>
-              <button 
-                onClick={() => navigate('/login')} 
-                className="login-redirect-btn"
-              >
-                Go to Login
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {error && !usingFallbackData && (
-        <div className="error-message">
-          <p>Error: {error}</p>
-        </div>
-      )}
-      
-      <button className="refresh-button" onClick={fetchRecommendations}>Refresh Recommendations</button>
-      
-      {recommendations.length === 0 && !error && !usingFallbackData ? (
-        <div className="no-recommendations">
-          <p>No scholarship recommendations found for your current preferences.</p>
-          <p>Try adjusting your preferences to see more opportunities.</p>
-        </div>
-      ) : (
-        <ul className="recommendations-list">
-          {recommendations.map((rec) => (
-            <li key={rec.id} className="recommendation-item">
-              <h3>{rec.scholarshipName}</h3>
-              <div className="score-container">
-                <span className="score-label">Match Score:</span>
-                <span className="score-value">{rec.score}%</span>
+      <div className="gradient-header"></div>
+      <div className="recommendations-content">
+        <h2>Your Scholarship Recommendations</h2>
+        
+        {usingFallbackData && (
+          <div className="notice">
+            <p>We're currently showing suggested scholarships that might be a good fit.</p>
+            {!localStorage.getItem('authToken') && (
+              <div className="auth-notice">
+                <p>For personalized recommendations, please log in.</p>
+                <button 
+                  onClick={() => navigate('/login')} 
+                  className="btn login-redirect-btn"
+                >
+                  Go to Login
+                </button>
               </div>
-              <p className="reason">{rec.reason}</p>
-              {rec.details && (
-                <div className="scholarship-details">
-                  <p><strong>Amount:</strong> ₹{rec.details.amount?.toLocaleString()}</p>
-                  <p><strong>Deadline:</strong> {new Date(rec.details.deadline).toLocaleDateString()}</p>
+            )}
+          </div>
+        )}
+        
+        {error && !usingFallbackData && (
+          <div className="error-message">
+            <p>Error: {error}</p>
+            <button className="btn refresh-button" onClick={fetchRecommendations}>
+              Try Again
+            </button>
+          </div>
+        )}
+        
+        <button className="btn refresh-button" onClick={fetchRecommendations}>
+          Refresh Recommendations
+        </button>
+        
+        {recommendations.length === 0 && !error && !usingFallbackData ? (
+          <div className="no-recommendations">
+            <p>No scholarship recommendations found for your current preferences.</p>
+            <p>Try adjusting your preferences to see more opportunities.</p>
+            <button 
+              className="btn preferences-btn"
+              onClick={() => navigate('/preferences')}
+            >
+              Update Preferences
+            </button>
+          </div>
+        ) : (
+          <ul className="recommendations-list">
+            {recommendations.map((rec) => (
+              <li key={rec.id} className="recommendation-item">
+                <h3>{rec.scholarshipName}</h3>
+                <div className="score-container">
+                  <div className="score-bar">
+                    <div 
+                      className="score-fill" 
+                      style={{ width: `${rec.score}%` }}
+                    ></div>
+                  </div>
+                  <span className="score-value">{rec.score}% Match</span>
                 </div>
-              )}
-              <button className="view-details-btn">View Details</button>
-            </li>
-          ))}
-        </ul>
-      )}
+                <p className="match-reason">{rec.reason}</p>
+                {rec.details && (
+                  <div className="scholarship-details">
+                    <p><strong>Amount:</strong> ₹{rec.details.amount?.toLocaleString()}</p>
+                    <p><strong>Deadline:</strong> {new Date(rec.details.deadline).toLocaleDateString()}</p>
+                  </div>
+                )}
+                <div className="action-buttons">
+                  <button className="btn view-details-btn">View Details</button>
+                  <button className="btn apply-btn">Apply Now</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };

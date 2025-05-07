@@ -1,0 +1,263 @@
+/* Recommendations Component Styling */
+.recommendations-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding-bottom: 2rem;
+  font-family: 'Poppins', 'Roboto', sans-serif;
+  color: #333;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.gradient-header {
+  height: 8px;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6, #d946ef);
+  margin-bottom: 2rem;
+}
+
+.recommendations-content {
+  padding: 0 2rem;
+}
+
+.recommendations-container h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #2d3748;
+  text-align: center;
+}
+
+/* Button Styles */
+.btn {
+  display: inline-block;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #fff;
+  background-color: #6366f1;
+}
+
+.btn:hover {
+  background-color: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.refresh-button {
+  margin: 1rem 0;
+  background-color: #6366f1;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  text-align: center;
+  color: #6366f1;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(99, 102, 241, 0.3);
+  border-radius: 50%;
+  border-top-color: #6366f1;
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error State */
+.error-message {
+  background-color: #fee2e2;
+  border-left: 4px solid #ef4444;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 6px;
+  color: #b91c1c;
+}
+
+/* Notice */
+.notice {
+  background-color: #e0f2fe;
+  padding: 1rem;
+  margin: 1rem 0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  border-left: 4px solid #3b82f6;
+}
+
+.auth-notice {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.login-redirect-btn {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+}
+
+/* No Recommendations */
+.no-recommendations {
+  background-color: #f3f4f6;
+  padding: 2rem;
+  text-align: center;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+}
+
+.preferences-btn {
+  margin-top: 1rem;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+}
+
+/* Recommendations List */
+.recommendations-list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.recommendation-item {
+  background-color: #f9fafb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  border: 1px solid #e5e7eb;
+}
+
+.recommendation-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-item h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+  color: #4338ca;
+}
+
+/* Score Bar */
+.score-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.score-bar {
+  flex-grow: 1;
+  height: 8px;
+  background-color: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6, #d946ef);
+  border-radius: 4px;
+}
+
+.score-value {
+  font-weight: 600;
+  color: #4338ca;
+  font-size: 0.9rem;
+  min-width: 80px;
+  text-align: right;
+}
+
+/* Recommendation Info */
+.match-reason {
+  margin-bottom: 1rem;
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.scholarship-details {
+  background-color: #eff6ff;
+  padding: 0.8rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  border-left: 3px solid #3b82f6;
+}
+
+.scholarship-details p {
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.view-details-btn {
+  background-color: #6b7280;
+  flex: 1;
+}
+
+.view-details-btn:hover {
+  background-color: #4b5563;
+}
+
+.apply-btn {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  flex: 1;
+}
+
+/* Responsive Design */
+@media (min-width: 640px) {
+  .recommendations-list {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .recommendations-content {
+    padding: 0 1rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+}

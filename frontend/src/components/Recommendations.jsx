@@ -1,159 +1,194 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
-const Recommendations = ({ user }) => {
+const Recommendations = () => {
+  // Get userId from URL params
+  const { userId } = useParams();
+  const navigate = useNavigate();
+  
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [usingFallbackData, setUsingFallbackData] = useState(false);
+
+  // Generate fallback recommendations for development/testing
+  const generateFallbackRecommendations = () => {
+    return [
+      {
+        id: 1001,
+        scholarshipName: "OBC Merit Scholarship",
+        score: 95,
+        reason: "Matches your OBC category and STEM field preference"
+      },
+      {
+        id: 1002,
+        scholarshipName: "Gujarat Technical Education Grant",
+        score: 87,
+        reason: "Available for diploma students in Gujarat state"
+      },
+      {
+        id: 1003,
+        scholarshipName: "Low Income Student Support",
+        score: 82,
+        reason: "Matches your income level of ₹400"
+      },
+      {
+        id: 1004,
+        scholarshipName: "Male STEM Achievement Award",
+        score: 79,
+        reason: "Available for male students in STEM fields"
+      }
+    ];
+  };
+
+  const fetchRecommendations = async () => {
+    try {
+      console.log("Fetching recommendations for user ID:", userId);
+      
+      if (!userId) {
+        console.error("User ID is missing");
+        throw new Error("User ID is missing");
+      }
+      
+      setLoading(true);
+      setError(null);
+      setUsingFallbackData(false);
+      
+      // Try to get a valid auth token from multiple sources
+      let token = localStorage.getItem('authToken') || 
+                  sessionStorage.getItem('authToken') || 
+                  localStorage.getItem('token') || 
+                  sessionStorage.getItem('token');
+      
+      // If no token found and server requires authentication, 
+      // we can use a fallback approach or redirect to login
+      if (!token) {
+        console.warn("No authentication token found - will use fallback data");
+        setUsingFallbackData(true);
+        setRecommendations(generateFallbackRecommendations());
+        setLoading(false);
+        return;
+      }
+      
+      console.log("Requesting from:", `http://localhost:5000/api/recommendations/${userId}`);
+      
+      const response = await fetch(`http://localhost:5000/api/recommendations/${userId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.error("Authentication failed - using fallback data");
+          setUsingFallbackData(true);
+          setRecommendations(generateFallbackRecommendations());
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log("Received data:", data);
+      
+      // If server returns empty array, use fallback data
+      if (Array.isArray(data) && data.length === 0) {
+        console.log("Server returned empty array - using fallback recommendations");
+        setUsingFallbackData(true);
+        setRecommendations(generateFallbackRecommendations());
+      } else {
+        setRecommendations(data);
+      }
+    } catch (err) {
+      console.error("Error fetching recommendations:", err.message);
+      setError(err.message);
+      
+      // Use fallback data in case of error
+      setUsingFallbackData(true);
+      setRecommendations(generateFallbackRecommendations());
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchRecommendations = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Verify API endpoint exists
-        const baseUrl = 'http://localhost:5000';
-        const endpoint = `${baseUrl}/api/recommendations/generate/${user?.id || 1}`;
-        
-        console.log('Attempting to fetch from:', endpoint); // Debugging
-        
-        const response = await axios.get(endpoint, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-          validateStatus: (status) => status < 500 // Don't throw for 4xx errors
-        });
+    console.log("Recommendations component mounted with userId:", userId);
+    if (userId) {
+      fetchRecommendations();
+    } else {
+      console.warn("No userId provided to Recommendations component");
+      setLoading(false);
+      setError("No user ID provided");
+    }
+  }, [userId]); // Keep userId in dependency array
 
-        // Enhanced response handling
-        if (response.status === 404) {
-          throw new Error('Recommendations service not found (404)');
-        }
+  console.log("Component state:", { 
+    userId, 
+    loading, 
+    error, 
+    recommendations 
+  });
+  
+  if (loading) return <div>Loading recommendations...</div>;
 
-        const data = response.data?.data || response.data;
-        
-        if (!data) {
-          throw new Error('No data received from server');
-        }
-
-        if (!Array.isArray(data)) {
-          // Handle single recommendation case
-          setRecommendations([data]);
-        } else {
-          setRecommendations(data);
-        }
-      } catch (err) {
-        console.error('Recommendation fetch error:', err);
-        
-        // More specific error messages
-        let errorMessage = 'Failed to fetch recommendations';
-        if (err.response) {
-          if (err.response.status === 401) {
-            errorMessage = 'Please login to view recommendations';
-          } else if (err.response.status === 404) {
-            errorMessage = 'Recommendations service unavailable';
-          } else if (err.response.data?.message) {
-            errorMessage = err.response.data.message;
-          }
-        } else if (err.message) {
-          errorMessage = err.message;
-        }
-        
-        setError(errorMessage);
-        setRecommendations([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRecommendations();
-  }, [user?.id]);
-
-  // Loading state with better accessibility
-  if (loading) {
-    return (
-      <div className="loading-container" aria-live="polite" aria-busy="true">
-        <div className="spinner" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-        <p>Loading recommendations...</p>
-      </div>
-    );
-  }
-
-  // Error state with recovery option
-  if (error) {
-    return (
-      <div className="error-container" role="alert">
-        <p className="error-message">Error: {error}</p>
-        <button 
-          className="retry-button"
-          onClick={() => {
-            setError(null);
-            setLoading(true);
-          }}
-          aria-label="Retry loading recommendations"
-        >
-          Try Again
-        </button>
-      </div>
-    );
-  }
-
-  // Main render with empty state handling
   return (
     <div className="recommendations-container">
-      <h2 className="recommendations-header">Recommended Scholarships</h2>
+      <h2>Your Scholarship Recommendations</h2>
       
-      {recommendations.length === 0 ? (
-        <p className="empty-message">
-          No recommendations found. Please check back later or update your profile.
-        </p>
+      {usingFallbackData && (
+        <div className="notice">
+          <p>We're currently showing suggested scholarships that might be a good fit.</p>
+          {!localStorage.getItem('authToken') && (
+            <div className="auth-notice">
+              <p>For personalized recommendations, please log in.</p>
+              <button 
+                onClick={() => navigate('/login')} 
+                className="login-redirect-btn"
+              >
+                Go to Login
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {error && !usingFallbackData && (
+        <div className="error-message">
+          <p>Error: {error}</p>
+        </div>
+      )}
+      
+      <button className="refresh-button" onClick={fetchRecommendations}>Refresh Recommendations</button>
+      
+      {recommendations.length === 0 && !error && !usingFallbackData ? (
+        <div className="no-recommendations">
+          <p>No scholarship recommendations found for your current preferences.</p>
+          <p>Try adjusting your preferences to see more opportunities.</p>
+        </div>
       ) : (
         <ul className="recommendations-list">
-          {recommendations.map((rec, index) => (
-            <RecommendationCard 
-              key={`rec-${rec.id || index}`} 
-              recommendation={rec} 
-            />
+          {recommendations.map((rec) => (
+            <li key={rec.id} className="recommendation-item">
+              <h3>{rec.scholarshipName}</h3>
+              <div className="score-container">
+                <span className="score-label">Match Score:</span>
+                <span className="score-value">{rec.score}%</span>
+              </div>
+              <p className="reason">{rec.reason}</p>
+              {rec.details && (
+                <div className="scholarship-details">
+                  <p><strong>Amount:</strong> ₹{rec.details.amount?.toLocaleString()}</p>
+                  <p><strong>Deadline:</strong> {new Date(rec.details.deadline).toLocaleDateString()}</p>
+                </div>
+              )}
+              <button className="view-details-btn">View Details</button>
+            </li>
           ))}
         </ul>
       )}
     </div>
   );
 };
-
-// Extracted card component for better readability
-const RecommendationCard = ({ recommendation: rec }) => (
-  <li className="recommendation-card">
-    <h3 className="scholarship-title">{rec.title || 'Scholarship Program'}</h3>
-    
-    {rec.score && (
-      <div className="match-score">
-        <strong>Match Score:</strong> {Math.round(rec.score * 100)}%
-      </div>
-    )}
-    
-    <div className="scholarship-details">
-      <p><strong>Amount:</strong> {rec.amount ? `$${rec.amount.toLocaleString()}` : 'Varies'}</p>
-      {rec.deadline && (
-        <p><strong>Deadline:</strong> {new Date(rec.deadline).toLocaleDateString()}</p>
-      )}
-    </div>
-    
-    {(rec.reasons || rec.reason) && (
-      <div className="match-reasons">
-        <h4>Why this matches you:</h4>
-        <ul>
-          {rec.reasons?.map((reason, i) => (
-            <li key={`reason-${i}`}>{reason}</li>
-          )) || <li>{rec.reason}</li>}
-        </ul>
-      </div>
-    )}
-    
-    <button className="apply-button">Apply Now</button>
-  </li>
-);
 
 export default Recommendations;

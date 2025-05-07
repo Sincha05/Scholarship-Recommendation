@@ -1,35 +1,48 @@
-const db = require('../db');  // Import the database connection
+const db = require('../db'); // Ensure db is properly set up
 
-// Create a recommendation
-exports.createRecommendation = async (userId, scholarshipId, score, reason) => {
-  const query = `
-    INSERT INTO recommendations (user_id, scholarship_id, score, reason)
-    VALUES (?, ?, ?, ?)
+// Function to fetch recommendations based on user preferences
+const getRecommendationsForUser = (userId, callback) => {
+  // Fetch preferences for the user
+  const preferencesQuery = `
+    SELECT * FROM preferences WHERE user_id = ?
   `;
-  const [rows] = await db.execute(query, [userId, scholarshipId, score, reason]);
-  return rows;
+  
+  db.query(preferencesQuery, [userId], (err, preferences) => {
+    if (err) {
+      console.error('Error fetching preferences:', err);
+      return callback(err, null);
+    }
+
+    if (!preferences || preferences.length === 0) {
+      console.error('No preferences found for user:', userId);
+      return callback(null, []);
+    }
+
+    const userPreferences = preferences[0];  // Assuming one preference per user
+
+    // Fetch recommendations based on preferences
+    const recommendationQuery = `
+      SELECT * FROM scholarships
+      WHERE preferred_country = ? 
+      AND preferred_field = ? 
+      AND min_gpa <= ? 
+      AND max_income >= ?
+    `;
+
+    db.query(recommendationQuery, [
+      userPreferences.preferred_country,
+      userPreferences.preferred_field,
+      userPreferences.min_gpa,
+      userPreferences.max_income
+    ], (err, recommendations) => {
+      if (err) {
+        console.error('Error fetching recommendations:', err);
+        return callback(err, null);
+      }
+
+      callback(null, recommendations);
+    });
+  });
 };
 
-// Get recommendations for a specific user
-exports.getRecommendationsByUser = async (userId) => {
-  const query = `
-    SELECT r.id AS recommendation_id, s.title, s.deadline, r.score, r.reason
-    FROM recommendations r
-    JOIN scholarships s ON r.scholarship_id = s.id
-    WHERE r.user_id = ?
-  `;
-  const [rows] = await db.execute(query, [userId]);
-  return rows;
-};
-
-// Get all recommendations for admin (for review)
-exports.getAllRecommendations = async () => {
-  const query = `
-    SELECT r.id, u.name AS user_name, s.title AS scholarship_title, r.score, r.created_at
-    FROM recommendations r
-    JOIN users u ON r.user_id = u.id
-    JOIN scholarships s ON r.scholarship_id = s.id
-  `;
-  const [rows] = await db.execute(query);
-  return rows;
-};
+module.exports = { getRecommendationsForUser };

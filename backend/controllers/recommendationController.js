@@ -1,70 +1,129 @@
-const Recommendation = require('../models/recommendationModel');
-const Preference = require('../models/preferenceModel');
-const Scholarship = require('../models/scholarshipModel');
+const db = require('../db');
 
-const generateRecommendations = (req, res) => {
-  const userId = req.params.userId;
+const getRecommendationsForUser = (userId, callback) => {
+  // Fetch preferences for the user
+  const preferencesQuery = `
+    SELECT * FROM preferences WHERE user_id = ?
+  `;
+  
+  console.log('Executing preferences query for userId:', userId);  // Log the userId
 
-  Preference.getPreferences(userId, (prefErr, preferences) => {
-    if (prefErr) {
-      console.error('Error fetching preferences:', prefErr);
-      return res.status(500).json({ message: 'Failed to fetch preferences' });
+  db.query(preferencesQuery, [userId], (err, preferences) => {
+    if (err) {
+      console.error('Error fetching preferences:', err);
+      return callback(err, null);  // Return the error
     }
 
-    if (!preferences || !preferences.preferred_field) {
-      return res.status(404).json({ message: 'No preferences found or preferred field missing' });
+    // If no preferences found for the user, log the error and return empty array
+    if (!preferences || preferences.length === 0) {
+      console.error('No preferences found for user:', userId);
+      return callback(null, []);  // If no preferences found, return empty array
     }
 
-    const fields = preferences.preferred_field.split(',').map(f => f.trim());
+    const userPreferences = preferences[0];  // Get the user's first preference set
 
-    Scholarship.getScholarshipsByFields(fields, (schErr, scholarships) => {
-      if (schErr) {
-        console.error('Error fetching scholarships:', schErr);
-        return res.status(500).json({ message: 'Failed to fetch scholarships' });
+    // Log the fetched preferences for debugging
+    console.log('User preferences:', userPreferences);
+
+    // Fetch scholarships that match at least some of the criteria
+    // Using a more relaxed query to find relevant scholarships even if not all criteria match
+    const recommendationQuery = `
+      SELECT 
+        s.id, 
+        s.title as scholarshipName, 
+        s.description, 
+        s.amount, 
+        s.deadline,
+        s.field_of_study,
+        s.eligibility_criteria,
+        s.preferred_country,
+        s.preferred_field,
+        s.min_gpa,
+        s.max_income,
+        ROUND(
+          (
+            (CASE WHEN s.preferred_country = ? OR s.preferred_country = 'Any' THEN 25 ELSE 0 END) +
+            (CASE WHEN s.preferred_field = ? THEN 25 ELSE 0 END) +
+            (CASE WHEN s.min_gpa <= ? THEN 25 ELSE 0 END) +
+            (CASE WHEN s.max_income >= ? THEN 25 ELSE 0 END)
+          ) * 1.0
+        ) as score
+      FROM scholarships s
+      WHERE 
+        (s.preferred_country = ? OR s.preferred_country = 'Any')
+        OR s.preferred_field = ?
+        OR (s.min_gpa <= ? AND s.min_gpa > 0)
+        OR (s.max_income >= ? AND s.max_income > 0)
+      ORDER BY score DESC
+      LIMIT 10
+    `;
+    
+    console.log('Executing relaxed recommendation query with preferences:', userPreferences);  // Log the preferences
+
+    db.query(recommendationQuery, [
+      userPreferences.preferred_country,
+      userPreferences.preferred_field,
+      userPreferences.min_gpa,
+      userPreferences.max_income,
+      userPreferences.preferred_country,
+      userPreferences.preferred_field,
+      userPreferences.min_gpa,
+      userPreferences.max_income
+    ], (err, scholarships) => {
+      if (err) {
+        console.error('Error fetching scholarships:', err);
+        return callback(err, null);
       }
 
+      // Check if scholarships is empty
       if (!scholarships || scholarships.length === 0) {
-        return res.status(200).json({ message: 'No matching scholarships found' });
+        console.log('No matching scholarships found even with relaxed criteria');
+        return callback(null, []);
       }
 
-      const recommendations = [];
-      let processed = 0;
-
-      scholarships.forEach((scholarship) => {
-        Recommendation.getRecommendationsByUserAndScholarship(userId, scholarship.id, (recErr, existing) => {
-          if (recErr) {
-            console.error('Error checking existing recommendation:', recErr);
-            return; // Skip this one but continue processing others
+      // Convert scholarships to recommendations format
+      const recommendations = scholarships.map(scholarship => {
+        let reason = "Matches ";
+        
+        if (scholarship.preferred_country === userPreferences.preferred_country || 
+            scholarship.preferred_country === 'Any') {
+          reason += "your preferred country";
+        }
+        
+        if (scholarship.preferred_field === userPreferences.preferred_field) {
+          reason += reason.includes("your") ? " and field of study" : "your field of study";
+        }
+        
+        if (scholarship.min_gpa <= userPreferences.min_gpa) {
+          reason += reason.includes("your") ? " and academic requirements" : "your academic requirements";
+        }
+        
+        if (scholarship.max_income >= userPreferences.max_income) {
+          reason += reason.includes("your") ? " and financial criteria" : "your financial criteria";
+        }
+        
+        if (!reason.includes("your")) {
+          reason = "Potentially compatible with your profile";
+        }
+        
+        return {
+          id: scholarship.id,
+          scholarshipName: scholarship.scholarshipName,
+          score: scholarship.score,
+          reason: reason,
+          details: {
+            description: scholarship.description,
+            amount: scholarship.amount,
+            deadline: scholarship.deadline,
+            eligibility: scholarship.eligibility_criteria
           }
-
-          if (!existing) {
-            const score = 0.95; // Replace with your scoring logic
-            const reason = `Matches your interest in ${scholarship.field}`;
-
-            Recommendation.createRecommendation(userId, scholarship.id, score, reason, (createErr) => {
-              if (createErr) {
-                console.error('Error creating recommendation:', createErr);
-              } else {
-                recommendations.push({ userId, scholarshipId: scholarship.id, score, reason });
-              }
-
-              processed++;
-              if (processed === scholarships.length) {
-                res.status(200).json(recommendations);
-              }
-            });
-          } else {
-            processed++;
-            if (processed === scholarships.length) {
-              res.status(200).json(recommendations);
-            }
-          }
-        });
+        };
       });
+
+      console.log(`Found ${recommendations.length} recommendations with the relaxed criteria`);
+      callback(null, recommendations);
     });
   });
 };
 
-module.exports = {
-  generateRecommendations,
-};
+module.exports = { getRecommendationsForUser };

@@ -19,7 +19,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/scholarships" element={<Scholarships />} />
           <Route path="/preferences" element={<Preferences />} /> {/* ✅ New Route */}
-          <Route path="/recommendations" element={<Recommendations />} /> {/* ✅ New Route */}
+          <Route path="/recommendations/:userId" element={<Recommendations />} />
         </Routes>
       </Router>
     </AuthProvider>

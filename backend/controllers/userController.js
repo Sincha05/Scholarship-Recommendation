@@ -3,18 +3,67 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+
+
 exports.register = (req, res) => {
-  const { name, email, password, gender, country, field_of_study, gpa, income_level, date_of_birth } = req.body;
+  const {
+    name, email, password, gender, country,
+    field_of_study, gpa, income_level, date_of_birth
+  } = req.body;
+
+  // Validate email format
+  if (!email || !email.includes('@gmail.com') || !email.endsWith('.com')) {
+    return res.status(400).json({ error: 'Invalid email. Must be a valid Gmail address.' });
+  }
+
+  // Validate DOB not in future
+  const dob = new Date(date_of_birth);
+const today = new Date();
+
+// Check if DOB is in the future
+if (dob > today) {
+  return res.status(400).json({ error: 'Date of birth cannot be in the future.' });
+}
+
+// Check if user is at least 18
+const ageDiff = today.getFullYear() - dob.getFullYear();
+const monthDiff = today.getMonth() - dob.getMonth();
+const dayDiff = today.getDate() - dob.getDate();
+
+const is18OrOlder =
+  ageDiff > 18 ||
+  (ageDiff === 18 && (monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0)));
+
+if (!is18OrOlder) {
+  return res.status(400).json({ error: 'You must be at least 18 years old to register.' });
+}
+
+
+  // Validate strong password
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({
+      error: 'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.'
+    });
+  }
+
+  // Hash password
   const hashedPassword = bcrypt.hashSync(password, 8);
 
-  const query = `INSERT INTO users (name, email, password, gender, country, field_of_study, gpa, income_level, date_of_birth)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+  const query = `INSERT INTO users 
+    (name, email, password, gender, country, field_of_study, gpa, income_level, date_of_birth)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-  db.query(query, [name, email, hashedPassword, gender, country, field_of_study, gpa, income_level, date_of_birth], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: 'User registered successfully' });
-  });
+  db.query(
+    query,
+    [name, email, hashedPassword, gender, country, field_of_study, gpa, income_level, date_of_birth],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: 'User registered successfully' });
+    }
+  );
 };
+
 
 exports.login = (req, res) => {
   console.log('Login request received:', req.body); // Log incoming request

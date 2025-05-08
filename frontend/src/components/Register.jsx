@@ -30,7 +30,32 @@ const Register = () => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
+  
+    const today = new Date();
+    const dob = new Date(formData.date_of_birth);
+    const emailRegex = /^[^\s@]+@gmail\.com$/i;
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+  
+    // ✅ Gmail check
+    if (!emailRegex.test(formData.email)) {
+      setIsLoading(false);
+      return setError("Email must be a valid Gmail address (e.g., user@gmail.com).");
+    }
+  
+    // ✅ Date check
+    if (dob > today) {
+      setIsLoading(false);
+      return setError("Date of birth cannot be in the future.");
+    }
+  
+    // ✅ Strong password
+    if (!strongPasswordRegex.test(formData.password)) {
+      setIsLoading(false);
+      return setError(
+        "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character."
+      );
+    }
+  
     axios
       .post("http://localhost:5000/api/users/register", formData)
       .then((response) => {
@@ -40,10 +65,11 @@ const Register = () => {
       })
       .catch((error) => {
         setIsLoading(false);
-        setError(error.response?.data?.message || "Error registering user");
+        setError(error.response?.data?.error || "Error registering user");
       });
   };
-
+  
+  
   return (
     <form 
       onSubmit={handleSubmit}
@@ -427,9 +453,9 @@ const Register = () => {
             }}
           >
             <option value="">Select Income Level</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
+            <option value="low">Less than 2.5LPA</option>
+            <option value="medium">Between 2.5LPA to 8LPA</option>
+            <option value="high">Above 8LPA</option>
           </select>
         </div>
       </div>

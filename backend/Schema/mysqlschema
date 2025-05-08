@@ -30,15 +30,6 @@ CREATE TABLE preferences (
 );
 
 
-CREATE TABLE user_preferences (
-    user_id INT NOT NULL PRIMARY KEY,
-    preferred_country VARCHAR(100),
-    preferred_field VARCHAR(100),
-    min_gpa DECIMAL(3,2),
-    max_income VARCHAR(50),
-    gender_preference VARCHAR(50),
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
 
 CREATE TABLE scholarships (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,

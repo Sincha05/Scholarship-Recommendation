@@ -52,5 +52,89 @@ CREATE TABLE scholarships (
     preferred_country VARCHAR(100),
     preferred_field VARCHAR(100),
     min_gpa FLOAT,
-    max_income INT
+    max_income INT,
+    Link varchar(30)
+);
+
+INSERT INTO scholarships 
+(title, description, deadline, amount, field_of_study, eligibility_criteria, preferred_country, preferred_field, min_gpa, max_income, Link)
+VALUES ('Prize Money Scholarship', 
+ 'For SC/ST students of Karnataka pursuing graduate or postgraduate degrees.', 
+ '2025-08-15', 35000.00, 'Engineering', 
+ 'SC/ST Karnataka domicile students with valid caste certificate.', 
+ 'India', 'Engineering', 0.0, NULL, 'https://ssp.postmatric.karnataka.gov.in'),
+
+-- 3. Chief Minister’s Scholarship
+('Chief Minister’s Scholarship', 
+ 'Merit-based support for students from economically weaker sections.', 
+ '2025-07-31', 50000.00, 'Engineering', 
+ 'Meritorious students with family income < ₹2.5L.', 
+ 'India', 'Engineering', 7.0, 250000, 'https://karnataka.gov.in'),
+
+-- 4. Sitaram Jindal Foundation Scholarship
+('Sitaram Jindal Foundation Scholarship', 
+ 'Scholarship for meritorious and needy students across India including Karnataka.', 
+ '2025-10-01', 25000.00, 'Engineering', 
+ 'Minimum 60% marks for boys and 55% for girls in last exam. Annual income < ₹2.5L.', 
+ 'India', 'Engineering', 6.0, 250000, 'https://sjfoundation.org'),
+ --5. SSP Post Metric Scholarship
+('SSP Post Matric Scholarship 2025',
+    'Offered by the Karnataka State Government for students pursuing post-secondary education.',
+    '2025-02-28',
+    NULL,
+    'Engineering',
+    'Students studying post-secondary education in Karnataka.',
+    CURRENT_TIMESTAMP,
+    'India',
+    'Engineering',
+    NULL,
+    NULL,
+    'https://ssp.postmatric.karnataka.gov.in/'
+),
+-- 2. JK Tyre Shiksha Sarthi Scholarship 2025
+(
+    'JK Tyre Shiksha Sarthi Scholarship 2025',
+    'For daughters of heavy vehicle drivers residing in Karnataka, enrolled in undergraduate or diploma courses.',
+    '2025-02-15',
+    25000.00,
+    'Engineering',
+    'Daughters of heavy vehicle drivers residing in Karnataka, enrolled in undergraduate or diploma courses, with a family income ≤ INR 5,00,000.',
+    CURRENT_TIMESTAMP,
+    'India',
+    'Engineering',
+    NULL,
+    500000,
+    'https://www.buddy4study.com/scholarship/jk-tyre-shiksha-sarthi-scholarship'
+),
+
+-- 3. Samatva Ramasamy Engineering Scholarship 2025
+VALUES (
+    'Samatva Ramasamy Engineering Scholarship 2025',
+    'Supports engineering students from low-income backgrounds in Karnataka or Tamil Nadu.',
+    '2025-06-30',
+    NULL,
+    'Engineering',
+    'Applicants must be currently pursuing an engineering degree in Karnataka or Tamil Nadu and come from a low-income background.',
+    CURRENT_TIMESTAMP,
+    'India',
+    'Engineering',
+    NULL,
+    NULL,
+    'https://theglobalscholarship.org/scholarships/samatva-ramasamy-engineering-scholarship-2025'
+),
+
+-- 4. Foundation For Excellence (FFE) Scholarship
+(
+    'Foundation For Excellence (FFE) Scholarship',
+    'Provides scholarships to academically gifted students from low-income families pursuing engineering degrees.',
+    '2025-07-31',
+    NULL,
+    'Engineering',
+    'Students must have secured admission to quality engineering colleges and come from economically underprivileged backgrounds.',
+    CURRENT_TIMESTAMP,
+    'India',
+    'Engineering',
+    NULL,
+    NULL,
+    'https://ffe.org/'
 );

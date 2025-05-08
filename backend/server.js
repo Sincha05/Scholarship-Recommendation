@@ -8,7 +8,6 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 const userRoutes = require('./routes/userRoutes');
 const scholarshipRoutes = require('./routes/scholarshipRoutes');
-const applicationRoutes = require('./routes/applicationRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
 const preferenceRoutes = require('./routes/preferenceRoutes');
 
@@ -22,7 +21,6 @@ app.use(cors({
 
 app.use('/api/users', userRoutes);
 app.use('/api/scholarships', scholarshipRoutes);
-app.use('/api/applications', applicationRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/preferences', preferenceRoutes)
 

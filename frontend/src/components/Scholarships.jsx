@@ -5,7 +5,6 @@ const Scholarships = ({ user }) => {
   const [scholarships, setScholarships] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [applying, setApplying] = useState(null);
 
   const fetchScholarships = async () => {
     try {
@@ -34,37 +33,6 @@ const Scholarships = ({ user }) => {
   useEffect(() => {
     fetchScholarships();
   }, []);
-
-  const applyToScholarship = async (scholarshipId) => {
-    if (!user) {
-      alert("Please log in to apply for scholarships");
-      return;
-    }
-
-    setApplying(scholarshipId);
-    try {
-      await axios.post(
-        "http://localhost:5000/api/applications",
-        { scholarship_id: scholarshipId },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      setScholarships(prev => prev.filter(s => s.id !== scholarshipId));
-      alert("Application submitted successfully!");
-    } catch (error) {
-      console.error("Application error:", error);
-      alert(
-        error.response?.data?.error ||
-        "Failed to submit application. Please try again."
-      );
-    } finally {
-      setApplying(null);
-    }
-  };
 
   if (loading) {
     return (
@@ -259,7 +227,21 @@ const Scholarships = ({ user }) => {
               }}>
                 {scholarship.description}
               </p>
-              
+
+              {scholarship.eligibility_criteria && (
+                <div style={{
+                  margin: "12px 0",
+                  fontSize: "15px",
+                  color: "#37474f",
+                  backgroundColor: "#f1f5f9",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  lineHeight: "1.6"
+                }}>
+                  <strong>Eligibility:</strong> {scholarship.eligibility_criteria}
+                </div>
+              )}
+
               <div style={{
                 display: "flex",
                 alignItems: "center",
@@ -281,7 +263,7 @@ const Scholarships = ({ user }) => {
                     fontWeight: "700",
                     color: "#1dd1a1",
                     fontSize: "16px"
-                  }}>${scholarship.amount}</span>
+                  }}>₹{scholarship.amount}</span>
                 </div>
                 
                 <div style={{
@@ -298,9 +280,36 @@ const Scholarships = ({ user }) => {
                     fontWeight: "500",
                     color: "#ff6b6b",
                     fontSize: "16px"
-                  }}>{new Date(scholarship.deadline).toLocaleDateString()}</span>
+                  }}>
+                    {(() => {
+    const date = new Date(scholarship.deadline);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  })()}
+</span>
                 </div>
               </div>
+
+              {scholarship.Link && (
+                <div style={{ marginTop: "10px" }}>
+                  <a 
+                    href={scholarship.Link.startsWith("http") ? scholarship.Link : `https://${scholarship.Link}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{
+                      color: "#1e88e5",
+                      fontWeight: "600",
+                      textDecoration: "none",
+                      display: "inline-block",
+                      marginTop: "4px"
+                    }}
+                  >
+                    View Scholarship Details ↗
+                  </a>
+                </div>
+              )}
             </div>
           ))}
         </div>
